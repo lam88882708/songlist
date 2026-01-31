@@ -23,10 +23,10 @@ mongoose
 
 // 定义歌曲模型
 const SongSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  artist: { type: String, required: true },
-  type: { type: [String], required: true },
-  language: { type: [String], required: true },
+  title: { type: String},
+  artist: { type: String},
+  type: { type: [String]},
+  language: { type: [String]},
 });
 
 const Song = mongoose.model("Song", SongSchema);
