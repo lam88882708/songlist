@@ -27,6 +27,7 @@ const SongSchema = new mongoose.Schema({
   artist: { type: String},
   type: { type: [String]},
   language: { type: [String]},
+  key: { type: String, default: "未设置"},
 });
 
 const Song = mongoose.model("Song", SongSchema);
@@ -61,6 +62,21 @@ app.delete("/api/songs/:id", async (req, res) => {
     res.json({ message: "歌曲已删除" });
   } catch (err) {
     res.status(500).json({ error: "删除歌曲失败" });
+  }
+});
+
+// 编辑歌曲
+app.put("/api/songs/:id", async (req, res) => {
+  try {
+    const updatedSong = await Song.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true } // 返回更新后的文档
+    );
+    if (!updatedSong) return res.status(404).json({ error: "歌曲未找到" });
+    res.json(updatedSong);
+  } catch (err) {
+    res.status(500).json({ error: "编辑歌曲失败" });
   }
 });
 

@@ -8,60 +8,81 @@
 </head>
 <body>
   <div class="container">
+    <!-- 标题 -->
     <h1>🎵 歌单管理系统</h1>
 
     <!-- 管理员模式 -->
     <div>
       <h2>管理员模式</h2>
-      <input type="password" id="admin-password" placeholder="请输入管理员密码">
+      <input id="admin-password" type="password" placeholder="请输入管理员密码">
       <button onclick="enableAdminMode()">进入管理员模式</button>
+      <button id="exit-admin-mode" style="display: none;" onclick="disableAdminMode()">退出管理员模式</button>
       <p id="admin-status" style="color: red;">未启用管理员模式</p>
     </div>
 
-    <!-- 添加新歌曲部分 -->
-    <div id="admin-section" style="display: none;"> <!-- 管理员模式下显示 -->
+    <!-- 添加歌曲 -->
+    <div id="admin-section" style="display: none;">
       <h2>添加歌曲</h2>
       <div class="form-group">
         <label for="title">标题（必填）</label>
-        <input type="text" id="title" placeholder="请输入歌曲标题">
+        <input id="title" type="text" placeholder="请输入歌曲标题">
       </div>
       <div class="form-group">
         <label for="artist">歌手（必填）</label>
-        <input type="text" id="artist" placeholder="请输入歌手名称">
+        <input id="artist" type="text" placeholder="请输入歌手名称">
       </div>
       <div class="form-group">
         <label for="type">类型（用逗号分隔）</label>
-        <input type="text" id="type" placeholder="例如：流行, 摇滚">
+        <input id="type" type="text" placeholder="请输入歌曲类型">
       </div>
       <div class="form-group">
         <label for="language">语言（用逗号分隔）</label>
-        <input type="text" id="language" placeholder="例如：中文, 英文">
+        <input id="language" type="text" placeholder="请输入歌曲语言">
+      </div>
+      <div class="form-group">
+        <label for="key">调性</label>
+        <input id="key" type="text" placeholder="请输入调性（如：原调、+1、-1等）">
       </div>
       <button onclick="addSong()">添加歌曲</button>
     </div>
 
-    <!-- 筛选部分 -->
-    <h2>筛选歌曲</h2>
+    <!-- 搜索歌曲 -->
     <div>
-      <input type="text" id="filter-type" placeholder="按类型筛选">
-      <input type="text" id="filter-language" placeholder="按语言筛选">
-      <button onclick="filterSongs()">筛选</button>
-      <button onclick="resetFilter()">重置筛选</button>
+      <h2>搜索歌曲</h2>
+      <input id="search-input" type="text" placeholder="请输入歌曲标题或歌手名称">
+      <div class="button-group">
+        <button onclick="searchSongs()">搜索</button>
+        <button onclick="resetSearch()">重置搜索</button>
+      </div>
     </div>
 
-    <!-- 随机歌曲部分 -->
-    <h2>随机歌曲</h2>
+    <!-- 筛选歌曲 -->
     <div>
-      <button onclick="getRandomSong()">全局随机</button>
-      <button onclick="getRandomFilteredSong()">标签随机</button>
-      <p id="random-result"></p>
+      <h2>筛选歌曲</h2>
+      <input id="filter-input" type="text" placeholder="请输入筛选条件">
+      <div class="button-group">
+        <button onclick="filterSongs()">筛选</button>
+        <button onclick="resetFilter()">重置筛选</button>
+      </div>
+    </div>
+
+    <!-- 随机播放 -->
+    <div>
+      <h2>随机歌曲</h2>
+      <div class="button-group">
+        <button id="play-global-random">全局随机</button>
+        <button id="play-filtered-random">标签随机</button>
+      </div>
     </div>
 
     <!-- 歌曲列表 -->
-    <h2>歌曲列表</h2>
-    <div id="song-list"></div>
+    <div>
+      <h2>歌曲列表</h2>
+      <div id="song-list" class="song-list"></div>
+    </div>
   </div>
 
+  <!-- 引入脚本 -->
   <script src="script.js"></script>
 </body>
 </html>
