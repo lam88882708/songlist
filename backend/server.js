@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // MongoDB 连接字符串（请替换为你的 MongoDB Atlas 连接字符串）
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://<username>:<password>@cluster0.mongodb.net/playlist?retryWrites=true&w=majority";
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://lam88882708:<Lam-20050409-Lam>@cluster0.zjroogr.mongodb.net/?appName=Cluster0";
 
 // 连接 MongoDB
 mongoose
