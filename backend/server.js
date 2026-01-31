@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // MongoDB 连接字符串（请替换为你的 MongoDB Atlas 连接字符串）
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://render:oSUVToXS6Nxdk40R@cluster0.zjroogr.mongodb.net/?appName=Cluster0";
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://render:oSUVToXS6Nxdk40R@cluster0.zjroogr.mongodb.net/songlist?retryWrites=true&w=majority";
 
 // 连接 MongoDB
 mongoose
@@ -25,8 +25,8 @@ mongoose
 const SongSchema = new mongoose.Schema({
   title: { type: String, required: true },
   artist: { type: String, required: true },
-  type: { type: String, required: true },
-  language: { type: String, required: true },
+  type: { type: [String], required: true },
+  language: { type: [String], required: true },
 });
 
 const Song = mongoose.model("Song", SongSchema);
