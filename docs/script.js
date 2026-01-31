@@ -5,9 +5,23 @@ const API_URL = "https://songlist-backend.onrender.com/api/songs";
 let songs = [];
 let filteredSongs = [];
 let isAdmin = false; // 定义管理员模式开关
+let currentPage = 1;
+const PAGE_SIZE = 10;
 
 // 管理员模式密码（仅前端验证，建议后端额外增加验证）
 const ADMIN_PASSWORD = "050409Mai"; // 修改为你的密码
+
+// 侧栏切换
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.toggle("active");
+}
+
+// 关闭侧栏
+function closeSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.remove("active");
+}
 
 // 启用管理员模式
 function enableAdminMode() {
@@ -42,6 +56,7 @@ async function loadSongs() {
   try {
     const response = await fetch(API_URL);
     songs = await response.json();
+    currentPage = 1;
     renderSongs();
   } catch (error) {
     console.error("加载歌曲失败", error);
@@ -128,9 +143,21 @@ function playRandomSong() {
 
   // 从歌曲列表中随机选择一首
   const randomSong = songs[Math.floor(Math.random() * songs.length)];
-  
-  // 弹出窗口显示随机歌曲
-  alert(`随机播放的歌曲是：\n\n标题：${randomSong.title}\n歌手：${randomSong.artist}`);
+  // 在随机容器内显示随机歌曲
+  const resultEl = document.getElementById('random-result');
+  if (resultEl) {
+    resultEl.innerHTML = `
+      <div class="random-row">
+        <div class="random-left">
+          <div class="random-title">${randomSong.title}</div>
+          <div class="random-artist">${randomSong.artist}</div>
+        </div>
+        <div class="random-key">调性：${randomSong.key || "未设置"}</div>
+      </div>
+    `;
+  } else {
+    alert(`随机播放的歌曲是：\n\n标题：${randomSong.title}\n歌手：${randomSong.artist}`);
+  }
 }
 
 // 随机播放按标签筛选的歌曲
@@ -139,36 +166,62 @@ function playRandomFilteredSong() {
   const targetSongs = filteredSongs.length > 0 ? filteredSongs : songs;
   
   if (targetSongs.length === 0) {
-    alert("当前没有可播放的歌曲！");
+    const resultElEmpty = document.getElementById('random-result');
+    if (resultElEmpty) {
+      resultElEmpty.innerHTML = `<div class="random-empty">当前没有可播放的歌曲！</div>`;
+    } else {
+      alert("当前没有可播放的歌曲！");
+    }
     return;
   }
 
   // 从歌曲列表中随机选择一首
   const randomSong = targetSongs[Math.floor(Math.random() * targetSongs.length)];
-  
-  // 弹出窗口显示随机歌曲
+  // 在随机容器内显示随机歌曲
   const source = filteredSongs.length > 0 ? "筛选结果中" : "全部歌曲中";
-  alert(`${source}随机播放的歌曲是：\n\n标题：${randomSong.title}\n歌手：${randomSong.artist}`);
+  const resultEl = document.getElementById('random-result');
+  if (resultEl) {
+    resultEl.innerHTML = `
+      <div class="random-source">${source}</div>
+      <div class="random-row">
+        <div class="random-left">
+          <div class="random-title">${randomSong.title}</div>
+          <div class="random-artist">${randomSong.artist}</div>
+        </div>
+        <div class="random-key">调性：${randomSong.key || "未设置"}</div>
+      </div>
+    `;
+  } else {
+    alert(`${source}随机播放的歌曲是：\n\n标题：${randomSong.title}\n歌手：${randomSong.artist}`);
+  }
 }
 
 // 渲染歌曲列表
 function renderSongs() {
   const songList = document.getElementById("song-list");
   songList.innerHTML = "";
+  const list = filteredSongs.length > 0 ? filteredSongs : songs;
+  const totalItems = list.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageItems = list.slice(start, start + PAGE_SIZE);
 
-  (filteredSongs.length > 0 ? filteredSongs : songs).forEach(song => {
+  pageItems.forEach(song => {
     const songDiv = document.createElement("div");
     songDiv.className = "song";
-    
+
     const typeTagsHtml = song.type.map(tag => `<span class="tag">${tag}</span>`).join(", ");
     const languageTagsHtml = song.language.map(tag => `<span class="tag">${tag}</span>`).join(", ");
-    
+
     songDiv.innerHTML = `
       <div class="song-info">
         <div class="song-title">${song.title}</div>
         <div class="song-artist">${song.artist}</div>
       </div>
-      ${isAdmin ? `<button onclick="deleteSong('${song._id}')">删除</button><button onclick="editSong('${song._id}')">编辑</button>` : ""}
+      <div class="song-buttons">
+        ${isAdmin ? `<button onclick="deleteSong('${song._id}')">删除</button><button onclick="editSong('${song._id}')">编辑</button>` : ""}
+      </div>
       <div class="song-tags-wrapper">
         <div class="song-tags"><div><strong>类型：</strong>${typeTagsHtml}</div></div>
         <div class="song-tags"><div><strong>语言：</strong>${languageTagsHtml}</div></div>
@@ -177,6 +230,86 @@ function renderSongs() {
     `;
     songList.appendChild(songDiv);
   });
+
+  updatePagination(totalItems);
+}
+
+function getTotalPages(totalItems) {
+  return Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+}
+
+function goToPage(n) {
+  const listLength = filteredSongs.length > 0 ? filteredSongs.length : songs.length;
+  const total = getTotalPages(listLength);
+  if (n < 1) n = 1;
+  if (n > total) n = total;
+  currentPage = n;
+  renderSongs();
+}
+
+function updatePagination(totalItems) {
+  const pagination = document.getElementById('pagination');
+  if (!pagination) return;
+  pagination.innerHTML = '';
+  const total = getTotalPages(totalItems);
+  // 上一页按钮
+  const prev = document.createElement('button');
+  prev.textContent = '上一页';
+  prev.disabled = currentPage === 1;
+  prev.addEventListener('click', () => goToPage(currentPage - 1));
+  pagination.appendChild(prev);
+
+  // 数字页码（在中间）
+  const pagesContainer = document.createElement('div');
+  pagesContainer.className = 'pages-container';
+
+  const maxButtons = 7; // 最大显示按钮数量
+  let startPage = 1;
+  let endPage = total;
+  if (total > maxButtons) {
+    const half = Math.floor(maxButtons / 2);
+    startPage = Math.max(1, currentPage - half);
+    endPage = startPage + maxButtons - 1;
+    if (endPage > total) {
+      endPage = total;
+      startPage = endPage - maxButtons + 1;
+    }
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const p = document.createElement('button');
+    p.className = 'page-num';
+    p.textContent = String(i);
+    if (i === currentPage) {
+      p.classList.add('active');
+      p.disabled = true;
+    }
+    p.addEventListener('click', () => goToPage(i));
+    pagesContainer.appendChild(p);
+  }
+
+  // 在 prev 之后放置数字页码（带省略），然后放 next
+  if (startPage > 1) {
+    const leftEll = document.createElement('span');
+    leftEll.className = 'ellipsis';
+    leftEll.textContent = '...';
+    pagination.appendChild(leftEll);
+  }
+
+  pagination.appendChild(pagesContainer);
+
+  if (endPage < total) {
+    const rightEll = document.createElement('span');
+    rightEll.className = 'ellipsis';
+    rightEll.textContent = '...';
+    pagination.appendChild(rightEll);
+  }
+
+  const next = document.createElement('button');
+  next.textContent = '下一页';
+  next.disabled = currentPage === total;
+  next.addEventListener('click', () => goToPage(currentPage + 1));
+  pagination.appendChild(next);
 }
 
 // 编辑歌曲
@@ -255,6 +388,7 @@ function filterSongs() {
     alert("未找到符合条件的歌曲！");
   }
 
+  currentPage = 1;
   renderSongs();
 }
 
@@ -262,6 +396,7 @@ function filterSongs() {
 function resetFilter() {
   filteredSongs = [];
   document.getElementById("filter-input").value = "";
+  currentPage = 1;
   renderSongs();
 }
 
@@ -282,6 +417,7 @@ function searchSongs() {
     alert("未找到符合条件的歌曲！");
   }
 
+  currentPage = 1;
   renderSongs();
 }
 
@@ -289,6 +425,7 @@ function searchSongs() {
 function resetSearch() {
   filteredSongs = [];
   document.getElementById("search-input").value = "";
+  currentPage = 1;
   renderSongs();
 }
 

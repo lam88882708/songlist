@@ -11,74 +11,90 @@
     <!-- 标题 -->
     <h1>🎵 歌单管理系统</h1>
 
-    <!-- 管理员模式 -->
-    <div>
-      <h2>管理员模式</h2>
-      <input id="admin-password" type="password" placeholder="请输入管理员密码">
-      <button onclick="enableAdminMode()">进入管理员模式</button>
-      <button id="exit-admin-mode" style="display: none;" onclick="disableAdminMode()">退出管理员模式</button>
-      <p id="admin-status" style="color: red;">未启用管理员模式</p>
-    </div>
+    <!-- 侧栏切换按钮 -->
+    <button id="sidebar-toggle" class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
 
-    <!-- 添加歌曲 -->
-    <div id="admin-section" style="display: none;">
-      <h2>添加歌曲</h2>
-      <div class="form-group">
-        <label for="title">标题（必填）</label>
-        <input id="title" type="text" placeholder="请输入歌曲标题">
-      </div>
-      <div class="form-group">
-        <label for="artist">歌手（必填）</label>
-        <input id="artist" type="text" placeholder="请输入歌手名称">
-      </div>
-      <div class="form-group">
-        <label for="type">类型（用逗号分隔）</label>
-        <input id="type" type="text" placeholder="请输入歌曲类型">
-      </div>
-      <div class="form-group">
-        <label for="language">语言（用逗号分隔）</label>
-        <input id="language" type="text" placeholder="请输入歌曲语言">
-      </div>
-      <div class="form-group">
-        <label for="key">调性</label>
-        <input id="key" type="text" placeholder="请输入调性（如：原调、+1、-1等）">
-      </div>
-      <button onclick="addSong()">添加歌曲</button>
-    </div>
+    <!-- 左侧栏 -->
+    <aside id="sidebar" class="sidebar">
+      <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+        
+        <!-- 管理员模式 -->
+        <div class="sidebar-section">
+          <h3>管理员模式</h3>
+          <input id="admin-password" type="password" placeholder="请输入管理员密码">
+          <button onclick="enableAdminMode()">进入</button>
+          <button id="exit-admin-mode" style="display: none;" onclick="disableAdminMode()">退出</button>
+          <p id="admin-status" style="color: red; font-size: 12px;">未启用</p>
+        </div>
 
-    <!-- 搜索歌曲 -->
-    <div>
-      <h2>搜索歌曲</h2>
-      <input id="search-input" type="text" placeholder="请输入歌曲标题或歌手名称">
-      <div class="button-group">
-        <button onclick="searchSongs()">搜索</button>
-        <button onclick="resetSearch()">重置搜索</button>
-      </div>
-    </div>
+        <!-- 添加歌曲 -->
+        <div id="admin-section" style="display: none;" class="sidebar-section">
+          <h3>添加歌曲</h3>
+          <div class="form-group">
+            <label for="title">标题</label>
+            <input id="title" type="text" placeholder="歌曲标题">
+          </div>
+          <div class="form-group">
+            <label for="artist">歌手</label>
+            <input id="artist" type="text" placeholder="歌手名称">
+          </div>
+          <div class="form-group">
+            <label for="type">类型</label>
+            <input id="type" type="text" placeholder="用逗号分隔">
+          </div>
+          <div class="form-group">
+            <label for="language">语言</label>
+            <input id="language" type="text" placeholder="用逗号分隔">
+          </div>
+          <div class="form-group">
+            <label for="key">调性</label>
+            <input id="key" type="text" placeholder="如：原调、+1、-1">
+          </div>
+          <button onclick="addSong()">添加</button>
+        </div>
 
-    <!-- 筛选歌曲 -->
-    <div>
-      <h2>筛选歌曲</h2>
-      <input id="filter-input" type="text" placeholder="请输入筛选条件">
-      <div class="button-group">
-        <button onclick="filterSongs()">筛选</button>
-        <button onclick="resetFilter()">重置筛选</button>
-      </div>
-    </div>
+        <!-- 筛选歌曲 -->
+        <div class="sidebar-section">
+          <h3>筛选</h3>
+          <input id="filter-input" type="text" placeholder="标签">
+          <div class="button-group">
+            <button onclick="filterSongs()">筛选</button>
+            <button onclick="resetFilter()">重置</button>
+          </div>
+        </div>
+      </aside>
 
-    <!-- 随机播放 -->
-    <div>
-      <h2>随机歌曲</h2>
-      <div class="button-group">
-        <button id="play-global-random">全局随机</button>
-        <button id="play-filtered-random">标签随机</button>
-      </div>
-    </div>
+      <!-- 右侧主内容 -->
+      <main class="main-content">
+        <!-- 搜索歌曲 -->
+        <div class="control-section">
+          <div class="search-box">
+            <h3>搜索</h3>
+            <input id="search-input" type="text" placeholder="输入标题或歌手">
+            <div class="button-group">
+              <button onclick="searchSongs()">搜索</button>
+              <button onclick="resetSearch()">重置</button>
+            </div>
+          </div>
 
-    <!-- 歌曲列表 -->
-    <div>
-      <h2>歌曲列表</h2>
-      <div id="song-list" class="song-list"></div>
+          <!-- 随机播放 -->
+          <div class="random-box">
+            <h3>随机</h3>
+            <div class="button-group">
+              <button id="play-global-random">全局</button>
+              <button id="play-filtered-random">标签</button>
+            </div>
+            <div id="random-result" class="random-result" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <!-- 歌曲列表 -->
+        <div>
+          <h2>歌曲列表</h2>
+          <div id="song-list" class="song-list"></div>
+          <div id="pagination" class="pagination" aria-label="分页控件"></div>
+        </div>
+      </main>
     </div>
   </div>
 
