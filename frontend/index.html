@@ -4,74 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>歌单管理系统</title>
-  <!-- 引入外部样式文件 -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 主容器，页面主体的内容都放在这里 -->
   <div class="container">
-    <!-- 页面标题 -->
     <h1>🎵 歌单管理系统</h1>
 
-    <!-- 添加新歌曲的部分 -->
-    <h2>添加歌曲</h2>
+    <!-- 管理员模式 -->
     <div>
-      <!-- 输入框：标题 -->
+      <h2>管理员模式</h2>
+      <input type="password" id="admin-password" placeholder="请输入管理员密码">
+      <button onclick="enableAdminMode()">进入管理员模式</button>
+      <p id="admin-status" style="color: red;">未启用管理员模式</p>
+    </div>
+
+    <!-- 添加新歌曲部分 -->
+    <div id="admin-section" style="display: none;"> <!-- 管理员模式下显示 -->
+      <h2>添加歌曲</h2>
       <div class="form-group">
         <label for="title">标题（必填）</label>
         <input type="text" id="title" placeholder="请输入歌曲标题">
       </div>
-      <!-- 输入框：歌手 -->
       <div class="form-group">
         <label for="artist">歌手（必填）</label>
         <input type="text" id="artist" placeholder="请输入歌手名称">
       </div>
-      <!-- 输入框：类型 -->
       <div class="form-group">
         <label for="type">类型（用逗号分隔）</label>
         <input type="text" id="type" placeholder="例如：流行, 摇滚">
       </div>
-      <!-- 输入框：语言 -->
       <div class="form-group">
         <label for="language">语言（用逗号分隔）</label>
         <input type="text" id="language" placeholder="例如：中文, 英文">
       </div>
-      <!-- 添加按钮 -->
       <button onclick="addSong()">添加歌曲</button>
     </div>
 
-    <!-- 筛选歌曲部分 -->
+    <!-- 筛选部分 -->
     <h2>筛选歌曲</h2>
     <div>
-      <!-- 输入框和按钮，用于类型或语言筛选 -->
-      <label for="filter-type">按类型筛选</label>
-      <input type="text" id="filter-type" placeholder="例如：流行">
-      <label for="filter-language">按语言筛选</label>
-      <input type="text" id="filter-language" placeholder="例如：中文">
-      <div class="button-group">
-        <button onclick="filterSongs()">筛选</button>
-        <button onclick="resetFilter()">重置筛选</button>
-      </div>
+      <input type="text" id="filter-type" placeholder="按类型筛选">
+      <input type="text" id="filter-language" placeholder="按语言筛选">
+      <button onclick="filterSongs()">筛选</button>
+      <button onclick="resetFilter()">重置筛选</button>
     </div>
 
     <!-- 随机歌曲部分 -->
     <h2>随机歌曲</h2>
     <div>
-      <!-- 按钮，用于随机选择歌曲 -->
       <button onclick="getRandomSong()">全局随机</button>
       <button onclick="getRandomFilteredSong()">标签随机</button>
-      <!-- 显示随机歌曲结果 -->
       <p id="random-result"></p>
     </div>
 
-    <!-- 歌曲列表部分 -->
+    <!-- 歌曲列表 -->
     <h2>歌曲列表</h2>
-    <div class="song-list" id="song-list">
-      <!-- 歌曲将由 JavaScript 动态添加到这里 -->
-    </div>
+    <div id="song-list"></div>
   </div>
 
-  <!-- 引入外部 JavaScript 文件 -->
   <script src="script.js"></script>
 </body>
 </html>

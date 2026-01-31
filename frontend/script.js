@@ -4,13 +4,33 @@ const API_URL = "https://songlist-backend.onrender.com/api/songs";
 // 全局变量：存储从后端加载的所有歌曲数据
 let songs = [];
 let filteredSongs = [];
+let isAdmin = false; // 定义管理员模式开关
+
+// 管理员模式密码（仅前端验证，建议后端额外增加验证）
+const ADMIN_PASSWORD = "050409Mai"; // 修改为你的密码
+
+// 启用管理员模式
+function enableAdminMode() {
+  const enteredPassword = document.getElementById("admin-password").value;
+
+  // 验证管理员密码
+  if (enteredPassword === ADMIN_PASSWORD) {
+    isAdmin = true; // 开启管理员模式
+    document.getElementById("admin-status").innerText = "管理员模式已启用";
+    document.getElementById("admin-status").style.color = "green";
+    document.getElementById("admin-section").style.display = "block"; // 显示添加歌曲功能
+    renderSongs(); // 重渲染列表，显示删除按钮
+  } else {
+    alert("密码错误，无法启用管理员模式！");
+  }
+}
 
 // 从后端加载歌曲
 async function loadSongs() {
   try {
-    const response = await fetch(API_URL); // 请求后端 API
-    songs = await response.json(); // 将响应解析为 JSON 格式
-    renderSongs(); // 渲染歌曲到页面
+    const response = await fetch(API_URL);
+    songs = await response.json();
+    renderSongs();
   } catch (error) {
     console.error("加载歌曲失败", error);
   }
@@ -18,22 +38,23 @@ async function loadSongs() {
 
 // 添加新歌曲
 async function addSong() {
-  // 获取表单输入的值
+  if (!isAdmin) {
+    alert("您无权限添加歌曲！");
+    return;
+  }
+
   const title = document.getElementById("title").value.trim();
   const artist = document.getElementById("artist").value.trim();
   const type = document.getElementById("type").value.trim().split("，").map(tag => tag.trim());
   const language = document.getElementById("language").value.trim().split("，").map(tag => tag.trim());
 
-  // 检查表单必填字段
   if (!title || !artist) {
     alert("标题和歌手为必填项！");
     return;
   }
 
-  // 创建新歌曲对象
   const newSong = { title, artist, type, language };
 
-  // 提交到后端
   try {
     const response = await fetch(API_URL, {
       method: "POST",
@@ -42,10 +63,10 @@ async function addSong() {
     });
 
     if (response.ok) {
-      const savedSong = await response.json(); // 获取保存成功的歌曲
-      songs.push(savedSong); // 更新前端的歌曲列表
-      renderSongs(); // 重新渲染歌曲列表
-      clearForm(); // 清空表单
+      const savedSong = await response.json();
+      songs.push(savedSong);
+      renderSongs();
+      clearForm();
     } else {
       alert("添加失败！");
     }
@@ -56,11 +77,16 @@ async function addSong() {
 
 // 删除歌曲
 async function deleteSong(id) {
+  if (!isAdmin) {
+    alert("您无权限删除歌曲！");
+    return;
+  }
+
   try {
     const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
     if (response.ok) {
-      songs = songs.filter(song => song._id !== id); // 从列表中移除
-      renderSongs(); // 重新渲染列表
+      songs = songs.filter(song => song._id !== id);
+      renderSongs();
     } else {
       alert("删除失败！");
     }
@@ -72,24 +98,24 @@ async function deleteSong(id) {
 // 渲染歌曲列表
 function renderSongs() {
   const songList = document.getElementById("song-list");
-  songList.innerHTML = ""; // 清空旧的列表
+  songList.innerHTML = "";
 
   (filteredSongs.length > 0 ? filteredSongs : songs).forEach(song => {
     const songDiv = document.createElement("div");
-    songDiv.className = "song"; // 样式类名
+    songDiv.className = "song";
     songDiv.innerHTML = `
       <strong>${song.title}</strong> - ${song.artist}
       <div class="song-tags">
         <div><strong>类型：</strong>${song.type.map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
         <div><strong>语言：</strong>${song.language.map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
       </div>
-      <button onclick="deleteSong('${song._id}')">删除</button>
+      <button ${isAdmin ? "" : "disabled"} onclick="deleteSong('${song._id}')">删除</button>
     `;
-    songList.appendChild(songDiv); // 添加到列表中
+    songList.appendChild(songDiv);
   });
 }
 
-// 清空表单
+// 清空添加歌曲表单
 function clearForm() {
   document.getElementById("title").value = "";
   document.getElementById("artist").value = "";
@@ -97,46 +123,7 @@ function clearForm() {
   document.getElementById("language").value = "";
 }
 
-// 筛选歌曲
-function filterSongs() {
-  const filterType = document.getElementById("filter-type").value.trim();
-  const filterLanguage = document.getElementById("filter-language").value.trim();
+// ...
 
-  // 根据类型和语言筛选
-  filteredSongs = songs.filter(song => {
-    const matchesType = !filterType || song.type.includes(filterType);
-    const matchesLanguage = !filterLanguage || song.language.includes(filterLanguage);
-    return matchesType && matchesLanguage;
-  });
-
-  renderSongs();
-}
-
-// 重置筛选条件
-function resetFilter() {
-  filteredSongs = []; // 清空筛选结果
-  renderSongs();
-}
-
-// 获取随机歌曲（全局）
-function getRandomSong() {
-  if (songs.length === 0) {
-    alert("歌曲列表为空！");
-    return;
-  }
-  const randomSong = songs[Math.floor(Math.random() * songs.length)];
-  document.getElementById("random-result").innerText = `🎵 ${randomSong.title} - ${randomSong.artist}`;
-}
-
-// 获取随机歌曲（筛选结果）
-function getRandomFilteredSong() {
-  if (filteredSongs.length === 0) {
-    alert("没有符合筛选条件的歌曲！");
-    return;
-  }
-  const randomSong = filteredSongs[Math.floor(Math.random() * filteredSongs.length)];
-  document.getElementById("random-result").innerText = `🎵 ${randomSong.title} - ${randomSong.artist}`;
-}
-
-// 页面加载时从后端拉取数据
+// 页面加载时初始化
 loadSongs();
